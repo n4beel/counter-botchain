@@ -26,6 +26,7 @@ interface ReceiptRailProps {
   onClaimRefund?: (orderId: bigint) => void;
   isSubmitting?: boolean;
   userAddress?: string;
+  currentTimeSec?: number;
 }
 
 export default function ReceiptRail({
@@ -37,6 +38,7 @@ export default function ReceiptRail({
   onClaimRefund,
   isSubmitting = false,
   userAddress,
+  currentTimeSec,
 }: ReceiptRailProps) {
   // If an existing order is provided, show its receipt
   if (order) {
@@ -46,10 +48,10 @@ export default function ReceiptRail({
     const deadlineDate = new Date((Number(order.placedAt) + refundAfterSeconds) * 1000);
     const refundableNow =
       order.status === OrderStatus.Placed &&
-      isRefundReady(order.placedAt, refundAfterSeconds);
+      isRefundReady(order.placedAt, refundAfterSeconds, currentTimeSec);
 
     const isCustomer =
-      userAddress &&
+      !userAddress ||
       userAddress.toLowerCase() === order.customer.toLowerCase();
 
     return (

@@ -17,19 +17,30 @@ export default function OrderReceiptPage({
   const resolvedParams = use(params);
   const orderId = BigInt(resolvedParams.orderId);
 
-  const { fetchOrder, fetchShop, refundOrder, isTransacting, deployed } =
-    useCounter();
+  const {
+    fetchOrder,
+    fetchShop,
+    refundOrder,
+    fetchBlockTimestamp,
+    isTransacting,
+    deployed,
+  } = useCounter();
   const { address } = useAccount();
 
   const [order, setOrder] = useState<OrderData | null>(null);
   const [shop, setShop] = useState<ShopData | null>(null);
+  const [chainTime, setChainTime] = useState<number>(Math.floor(Date.now() / 1000));
   const [loading, setLoading] = useState(true);
 
   const refreshOrder = async () => {
     if (!deployed) return;
     try {
-      const o = await fetchOrder(orderId);
+      const [o, bTime] = await Promise.all([
+        fetchOrder(orderId),
+        fetchBlockTimestamp(),
+      ]);
       setOrder(o);
+      setChainTime(bTime);
       if (o) {
         const s = await fetchShop(o.shopId);
         setShop(s);
@@ -47,9 +58,13 @@ export default function OrderReceiptPage({
         return;
       }
       try {
-        const o = await fetchOrder(orderId);
+        const [o, bTime] = await Promise.all([
+          fetchOrder(orderId),
+          fetchBlockTimestamp(),
+        ]);
         if (mounted) {
           setOrder(o);
+          setChainTime(bTime);
           if (o) {
             const s = await fetchShop(o.shopId);
             if (mounted) setShop(s);
@@ -65,7 +80,7 @@ export default function OrderReceiptPage({
     return () => {
       mounted = false;
     };
-  }, [orderId, fetchOrder, fetchShop, deployed]);
+  }, [orderId, fetchOrder, fetchShop, fetchBlockTimestamp, deployed]);
 
   const handleClaimRefund = async (id: bigint) => {
     const ok = await refundOrder(id);
@@ -119,6 +134,7 @@ export default function OrderReceiptPage({
           onClaimRefund={handleClaimRefund}
           isSubmitting={isTransacting}
           userAddress={address}
+          currentTimeSec={chainTime}
         />
 
         <div className="flex items-center justify-center gap-4 text-xs font-heading font-bold">
