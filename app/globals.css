@@ -5,43 +5,45 @@
 @source "../lib/**/*.{ts,tsx}";
 
 @theme {
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-karla), system-ui, sans-serif;
+  --font-heading: var(--font-zilla), Georgia, serif;
+  --font-mono: var(--font-share-tech), ui-monospace, monospace;
 
-  --radius: 2px;
+  --radius: 4px;
   --radius-sm: 2px;
-  --radius-md: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 }
 
 /**
- * Design tokens.
- *
- * Every component reads these through `var(--token)` rather than a Tailwind colour class, which is
- * what lets a project change its whole palette from `lib/app-config.ts`: the root layout writes
- * `--accent` inline, overriding the default below. Nothing else needs editing per project.
+ * Design tokens for Archetype AC · Shopfront
+ * Ground / ink / accent: #E9F3EA pale green · #12351F forest ink · #F2A900 marigold accent
  */
 :root {
-  --bg-base: #0A0A0A;
-  --bg-surface: #111111;
-  --bg-elevated: #181818;
-  --bg-overlay: #1F1F1F;
-  --border-subtle: #1E1E1E;
-  --border-default: #2A2A2A;
-  --border-strong: #383838;
-  --text-primary: #EBEBEB;
-  --text-secondary: #888888;
-  --text-tertiary: #555555;
-  --accent: #00E5CC;
-  --success: #1DB954;
-  --warning: #F5A623;
-  --danger: #E53E3E;
-  /* Wallet menu: opaque, contrast-checked (scripts/check-ui-contract.py). Redefine per project for ITS ground. */
-  --menu-bg: #181818;
-  --menu-fg: #EBEBEB;
-  --menu-muted: #A8A8A8;
-  --menu-border: #3A3A3A;
-  --menu-hover-bg: #262626;
-  --menu-danger: #FF8A8A;
+  --bg-base: #E9F3EA;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F5FAF6;
+  --bg-overlay: #DDEEE0;
+  --border-subtle: #D5E5D8;
+  --border-default: #BFD3C4;
+  --border-strong: #8EAFA0;
+  --text-primary: #12351F;
+  --text-secondary: #355840;
+  --text-muted: #51705B;
+  --text-tertiary: #6E8A77;
+  --accent: #F2A900;
+  --accent-ink: #2A1D00;
+  --success: #1F7A3D;
+  --danger: #B3261E;
+  --warning: #8A5A00;
+
+  /* Wallet menu: opaque, contrast-checked */
+  --menu-bg: #FFFFFF;
+  --menu-fg: #12351F;
+  --menu-muted: #41604B;
+  --menu-border: #BFD3C4;
+  --menu-hover-bg: #E6F2E8;
+  --menu-danger: #B3261E;
 }
 
 @layer base {
@@ -69,16 +71,7 @@
   }
 }
 
-/* Touch targets
- *
- * The interface is deliberately dense, and at 26px tall a `size="sm"` button is comfortable with a
- * mouse and a coin-flip with a thumb. `pointer: coarse` matches touch input rather than screen
- * width, so this raises the hit area exactly where it is needed and leaves mouse density
- * untouched, including on a small laptop window.
- *
- * 44px is Apple's minimum; Android asks for 48dp. Padding rather than height, so a control that is
- * already large enough is not stretched.
- */
+/* Touch targets */
 @media (pointer: coarse) {
   button,
   [role="button"],
@@ -90,41 +83,79 @@
 
   input,
   textarea {
-    /* Anything under 16px makes iOS Safari zoom the page on focus, and it does not zoom back. */
     font-size: 16px;
   }
 }
 
-/* Nothing should be able to scroll the page sideways. A single overflowing address or hash
- * otherwise shifts the whole layout and there is no obvious culprit. */
+/* No sideways scroll */
 html,
 body {
   overflow-x: hidden;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--text-primary);
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-base);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 2px;
+  background: var(--border-default);
+  border-radius: 4px;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
 }
 
 .mono {
   font-family: var(--font-mono);
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
 }
 
-/* Toast entry. Radix drives the data-state; without the keyframes the toast simply appears. */
+/* Awning Striped Pattern: 24px stripes of marigold and forest */
+.awning-stripes {
+  background: repeating-linear-gradient(
+    90deg,
+    #F2A900 0px,
+    #F2A900 24px,
+    #12351F 24px,
+    #12351F 48px
+  );
+}
+
+.awning-stripes-mini {
+  background: repeating-linear-gradient(
+    90deg,
+    #F2A900 0px,
+    #F2A900 16px,
+    #12351F 16px,
+    #12351F 32px
+  );
+}
+
+/* Thermal paper receipt styling */
+.receipt-paper {
+  background: #FCFBF7;
+  color: #12351F;
+  border-left: 2px dashed #BFD3C4;
+  border-right: 2px dashed #BFD3C4;
+  box-shadow: 0 4px 14px rgba(18, 53, 31, 0.08);
+}
+
+.tin-container {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5FAF6 100%);
+  border: 1.5px solid var(--border-default);
+  box-shadow: 0 2px 8px rgba(18, 53, 31, 0.04);
+}
+
+/* Toast animations */
 @keyframes slideIn {
   from { transform: translateX(8px); opacity: 0; }
   to   { transform: translateX(0);   opacity: 1; }
@@ -146,7 +177,7 @@ body {
   );
   background-size: 800px 100%;
   animation: shimmer 1.6s ease-in-out infinite;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
