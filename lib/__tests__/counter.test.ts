@@ -161,7 +161,7 @@ describe("Log Parsers & findOrderIdFromReceipt", () => {
 
     const log = {
       address: dummyContract,
-      topics,
+      topics: topics as [`0x${string}`, ...`0x${string}`[]],
       data,
       blockHash: "0x1" as `0x${string}`,
       blockNumber: 1n,
