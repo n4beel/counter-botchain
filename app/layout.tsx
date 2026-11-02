@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Zilla_Slab, Karla, Share_Tech_Mono } from "next/font/google";
 import { EvmProvider } from "@/components/providers/EvmProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import WrongNetworkBar from "@/components/botchain/WrongNetworkBar";
 import { app } from "@/lib/app-config";
 import "./globals.css";
 
@@ -48,7 +49,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <body className="min-h-full antialiased bg-[var(--bg-base)] text-[var(--text-primary)]">
         <EvmProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <WrongNetworkBar />
+            {children}
+          </ToastProvider>
         </EvmProvider>
       </body>
     </html>

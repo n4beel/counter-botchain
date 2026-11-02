@@ -334,7 +334,9 @@ export default function ShopManagePage({
                   </label>
                   <input
                     id="item-price"
-                    type="text"
+                    type="number"
+                    step="any"
+                    min="0"
                     value={newPrice}
                     onChange={(e) => setNewPrice(e.target.value)}
                     placeholder="e.g. 0.05"
@@ -398,7 +400,9 @@ export default function ShopManagePage({
                         {isEditing ? (
                           <div className="flex items-center gap-1.5">
                             <input
-                              type="text"
+                              type="number"
+                              step="any"
+                              min="0"
                               value={editPrice}
                               onChange={(e) => setEditPrice(e.target.value)}
                               placeholder={formatEther(it.price)}

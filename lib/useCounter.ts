@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { assertActiveChain, checkedWrite, waitSuccess } from "@/lib/useChainWrite";
 import {
   usePublicClient,
   useWalletClient,
-  useChainId,
   useAccount,
 } from "wagmi";
 import { counterAbi } from "./botchain/abi";
 import { getDeployment, isDeployed } from "./botchain/deployment";
-import { type BotChainId, isBotChainId } from "./botchain/chain";
+import { activeBotChain } from "./botchain/chain";
 import { describeError } from "./errors";
 import { useToast } from "@/components/ui/Toast";
 import {
@@ -21,12 +21,10 @@ import {
 } from "./counter";
 
 export function useCounter() {
-  const chainId = useChainId();
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
 
-  const publicClient = usePublicClient(); // stable-hook-result
+  const publicClient = usePublicClient({ chainId: activeBotChain.id }); // stable-hook-result
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
   const { toast } = useToast();
@@ -247,14 +245,15 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "openShop",
         args: [name, refundAfter],
       });
       toast("info", "Opening shop on-chain...");
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      const receipt = await waitSuccess(publicClient, hash);
       toast("success", "Shop opened successfully!");
 
       const shopCount = await publicClient.readContract({
@@ -284,14 +283,15 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "setItem",
         args: [shopId, code, label, price],
       });
       toast("info", "Updating shelf inventory...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Item updated on shelf!");
       return true;
     } catch (err) {
@@ -315,7 +315,8 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "order",
@@ -323,7 +324,7 @@ export function useCounter() {
         value,
       });
       toast("info", "Placing order and paying BOT...");
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      const receipt = await waitSuccess(publicClient, hash);
       toast("success", "Order placed successfully!");
       const orderId = findOrderIdFromReceipt(receipt, deployment.address);
       return orderId;
@@ -343,14 +344,15 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "fulfil",
         args: [orderId],
       });
       toast("info", "Marking order fulfilled...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Order fulfilled! Payment credited to your pending balance.");
       return true;
     } catch (err) {
@@ -369,14 +371,15 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "decline",
         args: [orderId],
       });
       toast("info", "Declining order...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Order declined. Customer refunded to pending balance.");
       return true;
     } catch (err) {
@@ -395,14 +398,15 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "refund",
         args: [orderId],
       });
       toast("info", "Claiming order refund...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Refund claimed! Amount credited to your pending balance.");
       return true;
     } catch (err) {
@@ -421,13 +425,14 @@ export function useCounter() {
     }
     setIsTransacting(true);
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: counterAbi,
         functionName: "withdraw",
       });
       toast("info", "Withdrawing balance...");
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Withdrawn successfully to your wallet!");
       return true;
     } catch (err) {

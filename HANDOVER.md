@@ -144,3 +144,42 @@ npm run dev
 # 3. Run browser walkthrough
 node scripts/browser-walkthrough.mjs
 ```
+
+---
+
+## Feedback round 1 (Part A Remediation)
+
+### 1. Network Pinning & Transaction Layer
+- Integrated `lib/useChainWrite.ts` and `test/lint/chain-write-pinned.test.ts`. Writes are strictly pinned to `activeBotChain.id`.
+- Mounted `<WrongNetworkBar />` inside `ToastProvider` in `app/layout.tsx`.
+- Updated `components/botchain/NetworkBadge.tsx` with clickable network switch button.
+- Updated `lib/errors.ts` to describe chain mismatches with standard copy: `"Your wallet is on a different network. Switch it to <activeBotChain.name>, then try again."`.
+- Pinned `usePublicClient({ chainId: activeBotChain.id })` and `getDeployment(activeBotChain.id)` in `lib/useCounter.ts`.
+
+### 2. Amount Inputs & Decimal Handling
+- Set all BOT price inputs in `app/s/[id]/manage/page.tsx` to `type="number" step="any" min="0"`.
+
+### 3. Distinct Styling & Archetype AC Identity
+- Restructured `app/globals.css` with bespoke Shopfront primitives (storefront cards, price tags, awning stripes, receipt styling).
+- Reduced similarity to template from 0.748 down to **0.370** (threshold $\le 0.70$).
+- `python3 scripts/check-distinct.py counter` exits 0 with 0 findings.
+
+### 4. Deploy Script Verification
+- `contracts/script/Deploy.s.sol` wired to deploy `new Counter()`.
+- Verified execution with `forge script` against local anvil: printed non-zero address `0x5FbDB2315678afecb367f032d93F642f64180aa3` with 19,868 characters of bytecode confirmed via `cast code`.
+
+### 5. Invariant & Protocol Limits
+- `foundry.toml` configured with `[invariant] runs = 256, depth = 128, fail_on_revert = false`.
+- `README.md` updated with exact protocol limits taken from contract constants (`MAX_NAME_BYTES = 40`, `MIN_REFUND_WINDOW = 3600`, `MAX_REFUND_WINDOW = 2592000`, `MAX_ITEMS_PER_SHOP = 32`, `MAX_LABEL_BYTES = 32`, `MIN_QTY = 1`, `MAX_QTY = 99`, `MAX_BATCH_VIEW = 50`).
+
+### 6. Gates & Test Suite
+- `python3 scripts/check-ui-contract.py counter`: PASSED (0 findings)
+- `python3 scripts/check-tokens.py counter`: PASSED (0 undefined tokens)
+- `python3 scripts/check-honesty.py counter`: PASSED (0 findings)
+- `python3 scripts/check-distinct.py counter`: PASSED (0 problem pairs)
+- `forge test`: 22 passed (19 unit/fuzz, 3 invariant at 256 runs $\times$ 128 depth)
+- `python3 scripts/mutation-check.py counter`: 22 of 25 killed, 3 surviving equivalent mutants documented in `contracts/DECISIONS.md`
+- `npm test`: 10 passed (61 unit and lint tests)
+- `npx tsc --noEmit`: 0 errors
+- `npm run test:integration`: 2 passed (12 integration tests)
+

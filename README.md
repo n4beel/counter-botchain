@@ -39,6 +39,17 @@ All balances are withdrawn via secure, reentrancy-guarded pull payments.
 
 ## Contract Architecture (`contracts/src/Counter.sol`)
 
+### Protocol Limits (from contract constants)
+- `MAX_NAME_BYTES`: 40 bytes
+- `MIN_REFUND_WINDOW`: 3,600 seconds (1 hour)
+- `MAX_REFUND_WINDOW`: 2,592,000 seconds (30 days)
+- `MAX_ITEMS_PER_SHOP`: 32 items
+- `MAX_LABEL_BYTES`: 32 bytes
+- `MIN_QTY`: 1
+- `MAX_QTY`: 99
+- `MAX_BATCH_VIEW`: 50 entries per page
+
+### Core Methods
 - `createShop(name, refundAfter) returns (shopId)`: Opens a new counter (1h ≤ window ≤ 30d, name ≤ 40 bytes).
 - `setItem(shopId, code, label, price)`: Stocks or edits a shelf item (active if price > 0, deactivated if price == 0). Max 32 items per shop.
 - `order(shopId, item, qty) payable returns (orderId)`: Places an order with exact payment (`qty * price`). Stores snapshot of unit price.
